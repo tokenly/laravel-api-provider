@@ -8,7 +8,6 @@ use Illuminate\Contracts\Routing\Middleware;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Tokenly\LaravelEventLog\EventLog;
-// use Swapbot\Providers\EventLog\Facade\EventLog;
 
 class HandleAPIErrors implements Middleware {
 

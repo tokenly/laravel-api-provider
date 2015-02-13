@@ -2,10 +2,10 @@
 
 namespace Tokenly\LaravelApiProvider\Commands;
 
-use Swapbot\Providers\EventLog\Facade\EventLog;
 use Illuminate\Console\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
+use Tokenly\LaravelEventLog\Facade\EventLog;
 
 class NewAPIUserCommand extends Command {
 
@@ -56,7 +56,7 @@ EOF
         $user_model = $user_repository->create($user_vars);
         
         // log
-        // EventLog::log('user.create.cli', $user_model, ['id', 'email', 'apisecretkey']);
+        EventLog::log('user.create.cli', $user_model, ['id', 'email', 'apisecretkey']);
 
         // show the new user
         $user = clone $user_model;

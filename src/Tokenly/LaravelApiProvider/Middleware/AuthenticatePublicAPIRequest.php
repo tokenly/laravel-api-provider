@@ -8,7 +8,6 @@ use Illuminate\Contracts\Routing\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Swapbot\Providers\EventLog\Facade\EventLog;
 use Tokenly\HmacAuth\Exception\AuthorizationException;
 
 class AuthenticatePublicAPIRequest extends AuthenticateAPIRequest {

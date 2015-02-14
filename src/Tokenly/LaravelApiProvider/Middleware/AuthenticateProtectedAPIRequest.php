@@ -5,15 +5,12 @@ namespace Tokenly\LaravelApiProvider\Middleware;
 use Closure;
 use Exception;
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Routing\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Tokenly\HmacAuth\Exception\AuthorizationException;
-use LaravelApiProvider\Contracts\APIUserRepositoryContract;
-use LaravelApiProvider\Middleware\AuthenticateAPIRequest;
+use Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract;
 
-class AuthenticateProtectedPIRequest extends AuthenticateAPIRequest {
+class AuthenticateProtectedAPIRequest extends AuthenticateAPIRequest {
 
     /**
      * The Guard implementation.

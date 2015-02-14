@@ -4,10 +4,8 @@ namespace Tokenly\LaravelApiProvider\Middleware;
 
 use Closure;
 use Exception;
-use Illuminate\Contracts\Routing\Middleware;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use Tokenly\HmacAuth\Exception\AuthorizationException;
 
 class AuthenticatePublicAPIRequest extends AuthenticateAPIRequest {

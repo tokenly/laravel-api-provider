@@ -23,14 +23,12 @@ class APIServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->bindConfig();
-
         $this->app->bind('Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract', function($app) {
-            return $app->make(Config::get('api.userRepositoryClass'));
+            return $app->make(Config::get('api.userRepositoryClass', 'Tokenly\LaravelApiProvider\Repositories\UserRepository'));
         });
 
         $this->app->bind('Tokenly\LaravelApiProvider\Contracts\APIUserContract', function($app) {
-            return $app->make(Config::get('api.userClass'));
+            return $app->make(Config::get('api.userClass', 'Tokenly\LaravelApiProvider\Model\APIUser'));
         });
 
         $this->app->bind('api.catchErrors', function($app) {
@@ -40,25 +38,11 @@ class APIServiceProvider extends ServiceProvider
             return $app->make('Tokenly\LaravelApiProvider\Middleware\AuthenticatePublicAPIRequest');
         });
         $this->app->bind('api.protectedAuth', function($app) {
-            return $app->make('Tokenly\LaravelApiProvider\Middleware\AuthenticateProtectedPIRequest');
+            return $app->make('Tokenly\LaravelApiProvider\Middleware\AuthenticateProtectedAPIRequest');
         });
 
     }
 
-    protected function bindConfig()
-    {
-        $config = [];
-
-        $config = [
-            'api.userRepositoryClass' => env('API_USER_REPOSITORY_CLASS', 'Tokenly\LaravelApiProvider\Repositories\UserRepository'),
-            'api.userClass' => env('API_USER_CLASS', 'Tokenly\LaravelApiProvider\Model\APIUser'),
-        ];
-
-        // set the laravel config
-        Config::set($config);
-
-        return $config;
-    }
 
 }
 

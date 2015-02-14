@@ -16,43 +16,13 @@ use \Exception;
 class UserRepository implements APIUserRepositoryContract
 {
 
-    function __construct(APIUserContract $user_model) {
-        $this->user_model = $user_model;
+    function __construct(APIUserContract $prototype_model) {
+        $this->prototype_model = $prototype_model;
     }
 
 
     public function findByAPIToken($api_token) {
-        return $this->user_model->where('apitoken', $api_token)->first();
-    }
-
-
-    public function findByID($id) {
-        return $this->user_model->find($id);
-    }
-
-    public function findByUuid($uuid) {
-        return $this->user_model->where('uuid', $uuid)->first();
-    }
-
-    public function findAll() {
-        return $this->user_model->all();
-    }
-
-
-    public function update(Model $model, $attributes) {
-        return $model->update($attributes);
-    }
-
-    public function delete(Model $model) {
-        return $model->delete();
-    }
-
-    public function create($attributes) {
-        if (!isset($attributes['uuid'])) { $attributes['uuid'] = Uuid::uuid4()->toString(); }
-
-        $attributes = $this->modifyAttributesBeforeCreate($attributes);
-
-        return $this->user_model->create($attributes);
+        return $this->prototype_model->where('apitoken', $api_token)->first();
     }
 
 

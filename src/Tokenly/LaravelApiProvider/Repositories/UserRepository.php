@@ -7,13 +7,14 @@ use Illuminate\Support\Facades\Hash;
 use Rhumsaa\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 use Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract;
+use Tokenly\LaravelApiProvider\Repositories\APIRepository;
 use Tokenly\TokenGenerator\TokenGenerator;
 use \Exception;
 
 /*
 * UserRepository
 */
-class UserRepository implements APIUserRepositoryContract
+class UserRepository extends APIRepository implements APIUserRepositoryContract
 {
 
     function __construct(APIUserContract $prototype_model) {

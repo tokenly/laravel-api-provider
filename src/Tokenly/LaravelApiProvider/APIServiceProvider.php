@@ -41,6 +41,11 @@ class APIServiceProvider extends ServiceProvider
             return $app->make('Tokenly\LaravelApiProvider\Middleware\AuthenticateProtectedAPIRequest');
         });
 
+        // add artisan commands
+        $this->commands([
+            'Tokenly\LaravelApiProvider\Commands\NewAPIUserCommand',
+            'Tokenly\LaravelApiProvider\Commands\ListAPIUsersCommand',
+        ]);
     }
 
 

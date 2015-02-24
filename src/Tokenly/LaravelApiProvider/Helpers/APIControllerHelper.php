@@ -36,6 +36,10 @@ class APIControllerHelper {
         return json_encode($resource->serializeForAPI());
     }
 
+    public function transformValueForOutput($data) {
+        return json_encode($data);
+    }
+
     public function getAttributesFromRequest(Request $request) {
         $attributes = [];
         $allowed_vars = array_keys($request->rules());

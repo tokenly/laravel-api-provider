@@ -20,8 +20,11 @@ trait SerializesForAPI {
                 } else if ($value instanceof APISerializeable) {
                     $value = $value->serializeForAPI();
                 } else if (is_array($value)) {
-                    // if this is an array, then recurse
-                    $value = $this->__serializeForAPI(array_keys($value), $value);
+                    // if this is an array of objects, then recurse
+                    $keys = array_keys($value);
+                    if ($keys AND is_object($value[$keys[0]])) {
+                        $value = $this->__serializeForAPI($keys, $value);
+                    }
                 }
 
                 $out[camel_case($attribute_name)] = $value;

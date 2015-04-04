@@ -28,16 +28,16 @@ class APIControllerHelper {
         foreach ($resources as $resource) {
             $out[] = $resource->serializeForAPI();
         }
-        return json_encode($out);
+        return $this->buildJSONResponse($out);
     }
 
-    public function transformResourceForOutput($resource)
+    public function transformResourceForOutput($resource, $context=null)
     {
-        return json_encode($resource->serializeForAPI());
+        return $this->buildJSONResponse($resource->serializeForAPI($context));
     }
 
     public function transformValueForOutput($data) {
-        return json_encode($data);
+        return $this->buildJSONResponse($data);
     }
 
     public function getAttributesFromRequest(Request $request) {
@@ -66,6 +66,16 @@ class APIControllerHelper {
         // $this->transformResourceForOutput($resource);
     }
 
+    public function requireResource($uuid, APIResourceRepositoryContract $repository) {
+        // lookup the resource
+        $resource = $repository->findByUuid($uuid);
+
+        // handle resource not found
+        if (!$resource) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource not found.']], 404)); }
+
+        return $resource;
+    }
+
     // this is to find users that belong to the current user
     //   but also allows the user to find themselves
     public function requireResourceIsUserOrIsOwnedByUser($uuid, APIUserContract $user, APIResourceRepositoryContract $repository) {
@@ -81,7 +91,7 @@ class APIControllerHelper {
             $message = $errors;
             $errors = [$errors];
         }
-        return new JsonResponse(['message' => $message, 'errors' => $errors], $code);
+        return $this->buildJSONResponse(['message' => $message, 'errors' => $errors], $code);
     }
 
 
@@ -98,7 +108,7 @@ class APIControllerHelper {
         foreach ($repository->findAll() as $resource) {
             $out[] = $resource->serializeForAPI();
         }
-        return json_encode($out);
+        return $this->buildJSONResponse($out);
     }
 
     /**
@@ -109,7 +119,7 @@ class APIControllerHelper {
     public function store(APIResourceRepositoryContract $repository, $attributes)
     {
         $new_resource = $repository->create($attributes);
-        return json_encode($new_resource->serializeForAPI());
+        return $this->buildJSONResponse($new_resource->serializeForAPI());
     }
 
     /**
@@ -121,9 +131,9 @@ class APIControllerHelper {
     public function show(APIResourceRepositoryContract $repository, $id)
     {
         $resource = $repository->findByUuid($id);
-        if (!$resource) { return new JsonResponse(['message' => 'resource not found'], 404); }
+        if (!$resource) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
 
-        return json_encode($resource->serializeForAPI());
+        return $this->buildJSONResponse($resource->serializeForAPI());
     }
 
 
@@ -136,12 +146,12 @@ class APIControllerHelper {
     public function update(APIResourceRepositoryContract $repository, $id, $attributes)
     {
         $resource = $repository->findByUuid($id);
-        if (!$resource) { return new JsonResponse(['message' => 'resource not found'], 404); }
+        if (!$resource) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
 
         $success = $repository->update($resource, $attributes);
-        if (!$success) { return new JsonResponse(['message' => 'resource not found'], 404); }
+        if (!$success) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
 
-        return json_encode($resource->serializeForAPI());
+        return $this->buildJSONResponse($resource->serializeForAPI());
     }
 
     /**
@@ -153,13 +163,17 @@ class APIControllerHelper {
     public function destroy(APIResourceRepositoryContract $repository, $id)
     {
         $resource = $repository->findByUuid($id);
-        if (!$resource) { return new JsonResponse(['message' => 'resource not found'], 404); }
+        if (!$resource) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
 
         // delete
         $repository->delete($resource);
 
         // return 204
         return new Response('', 204);
+    }
+
+    public function buildJSONResponse($data, $http_code=200) {
+        return new JsonResponse($data, $http_code);
     }
 
 }

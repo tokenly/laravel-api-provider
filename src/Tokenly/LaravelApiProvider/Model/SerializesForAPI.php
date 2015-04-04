@@ -33,8 +33,15 @@ trait SerializesForAPI {
         return $out;
     }
 
-    public function serializeForAPI() {
-        return $this->__serializeForAPI($this->api_attributes, $this);
+    public function serializeForAPI($context=null) {
+        if ($context === null) {
+            $api_attributes = $this->api_attributes;
+        } else {
+            $var_name = 'api_attributes_'.$context;
+            $api_attributes = $this->{$var_name};
+        }
+
+        return $this->__serializeForAPI($api_attributes, $this);
     }
 
 }

@@ -30,6 +30,7 @@ abstract class APIRepository implements APIResourceRepositoryContract
     }
 
     public function update(Model $model, $attributes) {
+        $attributes = $this->modifyAttributesBeforeUpdate($attributes, $model);
         return $model->update($attributes);
     }
 
@@ -78,6 +79,10 @@ abstract class APIRepository implements APIResourceRepositoryContract
     // Modify
     
     protected function modifyAttributesBeforeCreate($attributes) {
+        return $attributes;
+    }
+
+    protected function modifyAttributesBeforeUpdate($attributes, Model $model) {
         return $attributes;
     }
 

@@ -8,8 +8,9 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
-use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
+use Tokenly\LaravelApiProvider\Contracts\APIPermissionedUserContract;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
+use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 
 class APIControllerHelper {
 
@@ -22,11 +23,11 @@ class APIControllerHelper {
      *
      * @return Response
      */
-    public function transformResourcesForOutput($resources)
+    public function transformResourcesForOutput($resources, $context=null)
     {
         $out = [];
         foreach ($resources as $resource) {
-            $out[] = $resource->serializeForAPI();
+            $out[] = $resource->serializeForAPI($context);
         }
         return $this->buildJSONResponse($out);
     }
@@ -83,6 +84,13 @@ class APIControllerHelper {
 
         return $this->requireResourceOwnedByUser($uuid, $user, $repository);
     }
+
+    public function requirePermission(APIPermissionedUserContract $user, $permission, $description=null) {
+        if (!$user->hasPermission($permission)) {
+            throw new HttpResponseException($this->newJsonResponseWithErrors("This user is not authorized to ".($description ? $description : ' perform this action'), 403));
+        }
+    }
+
 
     public function newJsonResponseWithErrors($errors, $code=500) {
         if (is_array($errors)) {

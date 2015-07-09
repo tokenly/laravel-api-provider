@@ -53,6 +53,14 @@ class APIControllerHelper {
         return $attributes;
     }
 
+    public function requireResourceOwnedByUserOrWithPermssion($uuid, APIPermissionedUserContract $user, APIResourceRepositoryContract $repository, $permission) {
+        if ($user->hasPermission($permission)) {
+            return $this->requireResource($uuid, $repository);
+        } else {
+            return $this->requireResourceOwnedByUser($uuid, $user, $repository);
+        }
+    }
+
     public function requireResourceOwnedByUser($uuid, APIUserContract $user, APIResourceRepositoryContract $repository) {
         // lookup the resource
         $resource = $repository->findByUuid($uuid);

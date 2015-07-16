@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Rhumsaa\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
+use Tokenly\LaravelApiProvider\Filter\RequestFilter;
 use \Exception;
 
 /*
@@ -51,8 +52,14 @@ abstract class APIRepository implements APIResourceRepositoryContract
         return $this->prototype_model->create($attributes);
     }
 
-    public function findAll() {
-        return $this->prototype_model->all();
+    public function findAll(RequestFilter $filter=null) {
+        if ($filter === null) {
+            return $this->prototype_model->all();
+        }
+
+        $query = $this->prototype_model->newQuery();
+        $filter->apply($query);
+        return $query->get();
     }
 
     public function findByUuid($uuid) {

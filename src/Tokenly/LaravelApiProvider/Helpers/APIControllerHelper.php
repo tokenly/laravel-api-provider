@@ -156,12 +156,17 @@ class APIControllerHelper {
     /**
      * Update the specified resource in storage.
      *
-     * @param  int  $id
+     * @param  string  $uuid
      * @return Response
      */
-    public function update(APIResourceRepositoryContract $repository, $id, $attributes)
+    public function update(APIResourceRepositoryContract $repository, $uuid, $attributes, APIUserContract $owner=null)
     {
-        $resource = $repository->findByUuid($id);
+        if ($owner !== null) {
+            $resource = $this->requireResourceOwnedByUser($uuid, $owner, $repository);
+        } else {
+            $resource = $repository->findByUuid($uuid);
+        }
+
         if (!$resource) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
 
         $success = $repository->update($resource, $attributes);

@@ -7,6 +7,15 @@ use Illuminate\Http\Request;
 
 /*
 * RequestFilter
+
+[
+    'fields' => [
+        'name'   => ['field' => 'name',],
+        'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
+        'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
+    ],
+    'defaults' => ['sort' => 'serial'],
+]
 */
 abstract class RequestFilter
 {
@@ -48,9 +57,24 @@ abstract class RequestFilter
             $params = $this->request->all();
             $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
 
+            // fill in default filters
+            foreach($field_filter_definitions as $filter_def) {
+                if (isset($filter_def['default'])) {
+                    if (!isset($params[$filter_def['field']])) {
+                        $params[$filter_def['field']] = $filter_def['default'];
+                    }
+                }
+            }            
+
             foreach($params as $param_key => $param_value) {
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
                     if (isset($filter_def['field'])) {
+
+                        // transform
+                        if (isset($filter_def['transformFn'])) {
+                            $param_value = call_user_func($filter_def['transformFn'], $param_value);
+                        }
+
                         $query->where($filter_def['field'], '=', $param_value);
                     }
                 }

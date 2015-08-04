@@ -80,6 +80,8 @@ abstract class RequestFilter
                 }
             }
         }
+
+        return $this;
     }
 
     // accepts ?limit=10

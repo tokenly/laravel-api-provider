@@ -58,7 +58,13 @@ abstract class APIRepository implements APIResourceRepositoryContract
         }
 
         $query = $this->prototype_model->newQuery();
-        $filter->apply($query);
+
+        if ($filter !== null) {
+            $filter->filter($query);
+            $filter->limit($query);
+            $filter->sort($query);
+        }
+
         return $query->get();
     }
 

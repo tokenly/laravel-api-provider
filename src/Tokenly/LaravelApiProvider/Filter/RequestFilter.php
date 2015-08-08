@@ -25,6 +25,7 @@ abstract class RequestFilter
 
     protected $request = null;
     protected $filter_definitions = [];
+    protected $apply_context = null;
 
     static $INDEX_UNIQUE_ID = 0;
 
@@ -75,7 +76,8 @@ abstract class RequestFilter
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
                     // index
                     if (isset($filter_def['useFilterFn']) AND is_callable($filter_def['useFilterFn'])) {
-                        call_user_func($filter_def['useFilterFn'], $query, $param_value, $params);
+                        if ($this->apply_context === null) { $this->apply_context = new \ArrayObject(); }
+                        call_user_func($filter_def['useFilterFn'], $query, $param_value, $params, $this->apply_context);
                     }
 
                     // field
@@ -126,14 +128,15 @@ abstract class RequestFilter
                     $filter_def = $field_filter_definitions[$parsed_sort_query['field']];
                     // check for a custom sort function
                     if (isset($filter_def['useSortFn'])) {
-                        call_user_func($filter_def['useSortFn'], $query, $parsed_sort_query, $params);
+                        if ($this->apply_context === null) { $this->apply_context = new \ArrayObject(); }
+                        call_user_func($filter_def['useSortFn'], $query, $parsed_sort_query, $params, $this->apply_context);
                         $any_sorts_found = true;
                     }
 
                     // use the sort field settings
                     if (isset($filter_def['sortField'])) {
                         $field = $filter_def['sortField'];
-                        $direction = $parsed_sort_query['direction'];
+                        $direction = $this->normalizeDirection($parsed_sort_query['direction'], isset($filter_def['defaultSortDirection']) ? $filter_def['defaultSortDirection'] : null);
                         $query->orderBy($field, $direction);
                         $any_sorts_found = true;
                     }
@@ -145,11 +148,15 @@ abstract class RequestFilter
         if (!$any_sorts_found) {
             // default sort
             if (isset($this->filter_definitions['defaults']) AND isset($this->filter_definitions['defaults']['sort'])) {
-                $parsed_sort_queries = $this->parseSortString($this->filter_definitions['defaults']['sort']);
-                foreach($parsed_sort_queries as $parsed_sort_query) {
-                    $field = $parsed_sort_query['field'];
-                    $direction = $parsed_sort_query['direction'];
-                    $query->orderBy($field, $direction);
+                $sort = $this->filter_definitions['defaults']['sort'];
+                $sorts = is_array($sort) ? $sort : [$sort];
+                foreach($sorts as $sort_field) {
+                    $filter_def = isset($this->filter_definitions['fields'][$sort_field]) ? $this->filter_definitions['fields'][$sort_field] : null;
+                    if ($filter_def) {
+                        $field = $filter_def['sortField'];
+                        $direction = $this->normalizeDirection(isset($filter_def['defaultSortDirection']) ? $filter_def['defaultSortDirection'] : null);
+                        $query->orderBy($field, $direction);
+                    }
                 }
             }
         }
@@ -166,14 +173,15 @@ abstract class RequestFilter
             $pieces = explode(' ', $sort_phrase, 2);
             $sorts[] = [
                 'field'        => trim($pieces[0]),
-                'direction'    => $this->normalizeDirection(isset($pieces[1]) ? $pieces[1] : null),
+                'direction'    => isset($pieces[1]) ? $this->normalizeDirection($pieces[1]) : null,
                 // 'rawDirection' => isset($pieces[1]) ? $pieces[1] : null,
             ];
         }
         return $sorts;
     }
 
-    protected function normalizeDirection($direction) {
+    protected function normalizeDirection($raw_direction, $default_direction=null) {
+        $direction = ($raw_direction === null ? $default_direction : $raw_direction);
         if (strtoupper(trim($direction)) === 'DESC') { return 'DESC'; }
         return 'ASC';
     }

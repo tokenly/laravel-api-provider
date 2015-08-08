@@ -11,6 +11,9 @@ use Illuminate\Http\Request;
 [
     'fields' => [
         'name'   => ['field' => 'name',],
+        'token'  => ['useFilterFn' => function($query, $param_value, $params) {}],
+        'token'  => ['useSortFn' => function($query, $parsed_sort_query, $params) {}],
+        'token'  => ['field' => 'bot_index.token', 'useIndex' => 'bot_index', 'foreign_id' => 'bot_index.id', 'op' => 'like'],
         'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
         'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
     ],
@@ -22,6 +25,8 @@ abstract class RequestFilter
 
     protected $request = null;
     protected $filter_definitions = [];
+
+    static $INDEX_UNIQUE_ID = 0;
 
     public static function createFromRequest(Request $request, $filter_definitions=null) {
         $instance = app(get_called_class());
@@ -68,14 +73,21 @@ abstract class RequestFilter
 
             foreach($params as $param_key => $param_value) {
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
-                    if (isset($filter_def['field'])) {
+                    // index
+                    if (isset($filter_def['useFilterFn']) AND is_callable($filter_def['useFilterFn'])) {
+                        call_user_func($filter_def['useFilterFn'], $query, $param_value, $params);
+                    }
 
+                    // field
+                    if (isset($filter_def['field'])) {
                         // transform
                         if (isset($filter_def['transformFn'])) {
                             $param_value = call_user_func($filter_def['transformFn'], $param_value);
                         }
 
-                        $query->where($filter_def['field'], '=', $param_value);
+                        if (strlen($param_value) AND $param_value != '*') {
+                            $query->where($filter_def['field'], '=', $param_value);
+                        }
                     }
                 }
             }
@@ -104,38 +116,61 @@ abstract class RequestFilter
 
         $params = $this->request->all();
 
-        $field = null;
-        $direction = null;
+        $any_sorts_found = false;
 
         $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
-        if (isset($params['sort']) AND $sort_data = $this->parseSortString($params['sort'])) {
-            if (isset($field_filter_definitions[$sort_data['field']]) AND isset($field_filter_definitions[$sort_data['field']]['sortField'])) {
-                $filter_def = $field_filter_definitions[$sort_data['field']];
-                $field = $filter_def['sortField'];
-                $direction = $sort_data['direction'] ?: $this->normalizeDirection($filter_def['defaultSortDirection']);
+        if (isset($params['sort'])) {
+            $parsed_sort_queries = $this->parseSortString($params['sort']);
+            foreach($parsed_sort_queries as $parsed_sort_query) {
+                if (isset($field_filter_definitions[$parsed_sort_query['field']])) {
+                    $filter_def = $field_filter_definitions[$parsed_sort_query['field']];
+                    // check for a custom sort function
+                    if (isset($filter_def['useSortFn'])) {
+                        call_user_func($filter_def['useSortFn'], $query, $parsed_sort_query, $params);
+                        $any_sorts_found = true;
+                    }
+
+                    // use the sort field settings
+                    if (isset($filter_def['sortField'])) {
+                        $field = $filter_def['sortField'];
+                        $direction = $parsed_sort_query['direction'];
+                        $query->orderBy($field, $direction);
+                        $any_sorts_found = true;
+                    }
+                }
+
             }
         }
 
-        if ($field === null) {
+        if (!$any_sorts_found) {
             // default sort
             if (isset($this->filter_definitions['defaults']) AND isset($this->filter_definitions['defaults']['sort'])) {
-                $default_sort_field = $this->filter_definitions['defaults']['sort'];
-                $filter_def = $field_filter_definitions[$default_sort_field];
-                $field = $filter_def['sortField'];
-                $direction = $this->normalizeDirection($filter_def['defaultSortDirection']);
+                $parsed_sort_queries = $this->parseSortString($this->filter_definitions['defaults']['sort']);
+                foreach($parsed_sort_queries as $parsed_sort_query) {
+                    $field = $parsed_sort_query['field'];
+                    $direction = $parsed_sort_query['direction'];
+                    $query->orderBy($field, $direction);
+                }
             }
         }
 
-        if ($field !== null) {
-            $query->orderBy($field, $direction);
-        }
 
         return $this;
     }
 
     protected function parseSortString($sort_string) {
-        $pieces = explode(' ', $sort_string, 2);
-        return ['field' => trim($pieces[0]), 'direction' => isset($pieces[1]) ? $this->normalizeDirection($pieces[1]) : null];
+        $sort_phrases = explode(',', $sort_string);
+
+        $sorts = [];
+        foreach($sort_phrases as $sort_phrase) {
+            $pieces = explode(' ', $sort_phrase, 2);
+            $sorts[] = [
+                'field'        => trim($pieces[0]),
+                'direction'    => $this->normalizeDirection(isset($pieces[1]) ? $pieces[1] : null),
+                // 'rawDirection' => isset($pieces[1]) ? $pieces[1] : null,
+            ];
+        }
+        return $sorts;
     }
 
     protected function normalizeDirection($direction) {

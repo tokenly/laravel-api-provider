@@ -1,0 +1,16 @@
+<?php
+
+namespace DummyNamespace;
+
+use Tokenly\LaravelApiProvider\Repositories\APIRepository;
+use Exception;
+
+/*
+* DummyClass
+*/
+class DummyClass extends APIRepository
+{
+
+    protected $model_type = 'DummyModelClass';
+
+}

@@ -3,12 +3,13 @@
 namespace Tokenly\LaravelApiProvider\Model;
 
 use Illuminate\Auth\Authenticatable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Database\Eloquent\Model;
+use Tokenly\LaravelApiProvider\Model\APIModel;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 use Tokenly\LaravelApiProvider\Model\SerializesForAPI;
 
-class APIUser extends Model implements AuthenticatableContract, APIUserContract {
+class APIUser extends APIModel implements AuthenticatableContract, APIUserContract {
 
     use Authenticatable;
 

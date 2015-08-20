@@ -1,0 +1,12 @@
+<?php
+
+namespace DummyNamespace;
+
+use Tokenly\LaravelApiProvider\Model\APIModel;
+use Exception;
+
+class DummyClass extends APIModel {
+
+    protected $api_attributes = ['id',];
+
+}

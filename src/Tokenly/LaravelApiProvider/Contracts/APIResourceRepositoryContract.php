@@ -3,6 +3,7 @@
 namespace Tokenly\LaravelApiProvider\Contracts;
 
 use Illuminate\Database\Eloquent\Model;
+use Tokenly\LaravelApiProvider\Filter\RequestFilter;
 
 /*
 * APIResourceRepositoryContract
@@ -12,7 +13,7 @@ interface APIResourceRepositoryContract
 
     public function create($attributes);
 
-    public function findAll();
+    public function findAll(RequestFilter $filter=null);
 
     public function findByUuid($uuid);
 

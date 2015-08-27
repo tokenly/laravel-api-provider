@@ -45,6 +45,8 @@ class APIServiceProvider extends ServiceProvider
         $this->commands([
             'Tokenly\LaravelApiProvider\Commands\NewAPIUserCommand',
             'Tokenly\LaravelApiProvider\Commands\ListAPIUsersCommand',
+            'Tokenly\LaravelApiProvider\Commands\MakeAPIModelCommand',
+            'Tokenly\LaravelApiProvider\Commands\MakeAPIRespositoryCommand',
         ]);
     }
 

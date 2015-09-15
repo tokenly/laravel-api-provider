@@ -87,7 +87,7 @@ abstract class RequestFilter
                             $param_value = call_user_func($filter_def['transformFn'], $param_value);
                         }
 
-                        if (strlen($param_value) AND $param_value != '*') {
+                        if (strlen($param_value) AND $param_value !== '*') {
                             $query->where($filter_def['field'], '=', $param_value);
                         }
                     }

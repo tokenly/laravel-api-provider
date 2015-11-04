@@ -48,9 +48,32 @@ abstract class RequestFilter
     
     public function apply($query) {
         $this
+            ->select($query)
             ->filter($query)
             ->sort($query)
             ->limit($query);
+
+        return $this;
+    }
+
+    // accepts ?select=name description data
+    public function select($query) {
+        $this->validateQuery($query);
+
+        if ($this->request !== null) {
+            $params = $this->request->all();
+            if (isset($params['select']) AND strlen($params['select'])) {
+                $field_names = explode(' ', $params['select']);
+                array_walk($field_names, function(&$val) { $val = trim($val); });
+                $field_names_map = array_fill_keys($field_names, true);
+
+                // always select the id and the uuid
+                $field_names_map['id'] = true;
+                $field_names_map['uuid'] = true;
+
+                $query->select(array_keys($field_names_map));
+            }
+        }
 
         return $this;
     }

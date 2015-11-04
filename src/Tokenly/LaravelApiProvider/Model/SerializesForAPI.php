@@ -3,6 +3,7 @@
 namespace Tokenly\LaravelApiProvider\Model;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 trait SerializesForAPI {
@@ -14,6 +15,13 @@ trait SerializesForAPI {
                 // id always uses the uuid
                 $out['id'] = $array['uuid'];
             } else {
+                // don't try to serialize values that don't exist
+                if ($array instanceof Model AND !$array->offsetExists($attribute_name)) {
+                    continue;
+                } else if (!isset($array[$attribute_name])) {
+                    continue;
+                }
+
                 $value = $array[$attribute_name];
                 if ($value instanceof Carbon) {
                     $value = $value->toIso8601String();

@@ -3,11 +3,10 @@
 namespace Tokenly\LaravelApiProvider\Middleware;
 
 use Illuminate\Contracts\Auth\Guard;
-use Illuminate\Contracts\Routing\Middleware;
 use Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract;
 use Tokenly\LaravelEventLog\EventLog;
 
-abstract class AuthenticateAPIRequest implements Middleware {
+abstract class AuthenticateAPIRequest {
 
     /**
      * Create a new filter instance.

@@ -4,12 +4,11 @@ namespace Tokenly\LaravelApiProvider\Middleware;
 
 use Closure;
 use Exception;
-use Illuminate\Contracts\Routing\Middleware;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Tokenly\LaravelEventLog\EventLog;
 
-class HandleAPIErrors implements Middleware {
+class HandleAPIErrors {
 
     /**
      * Create a new filter instance.

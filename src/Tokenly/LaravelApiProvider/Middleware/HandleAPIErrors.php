@@ -31,7 +31,14 @@ class HandleAPIErrors {
     public function handle($request, Closure $next)
     {
         try {
-            return $next($request);
+            $response = $next($request);
+
+            // always render exceptions ourselves
+            if (isset($response->exception) AND $response->exception) {
+                throw $response->exception;
+            }
+
+            return $response;
         } catch (HttpResponseException $e) {
             // HttpResponseException can pass through
             throw $e;

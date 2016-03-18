@@ -43,6 +43,7 @@ class HandleAPIErrors {
             // HttpResponseException can pass through
             throw $e;
         } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::debug("HandleAPIErrors caught exception ".$e->getMessage());
             try {
                 $error_trace = $this->getExceptionTraceAsString($e);
             } catch (Exception $other_e) {

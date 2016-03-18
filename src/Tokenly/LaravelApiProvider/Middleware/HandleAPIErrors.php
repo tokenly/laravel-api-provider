@@ -31,11 +31,19 @@ class HandleAPIErrors {
     public function handle($request, Closure $next)
     {
         try {
-            return $next($request);
+            $response = $next($request);
+
+            // always render exceptions ourselves
+            if (isset($response->exception) AND $response->exception) {
+                throw $response->exception;
+            }
+
+            return $response;
         } catch (HttpResponseException $e) {
             // HttpResponseException can pass through
             throw $e;
         } catch (Exception $e) {
+            \Illuminate\Support\Facades\Log::debug("HandleAPIErrors caught exception ".$e->getMessage());
             try {
                 $error_trace = $this->getExceptionTraceAsString($e);
             } catch (Exception $other_e) {

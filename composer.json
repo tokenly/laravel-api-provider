@@ -15,7 +15,7 @@
         "ramsey/uuid": "~2.",
         "tokenly/token-generator": "dev-master",
         "tokenly/laravel-event-log": "dev-master",
-        "tokenly/hmac-auth": "^0.2"
+        "tokenly/hmac-auth": "^1"
     },
     "require-dev": {
         "phpunit/phpunit": "~4"

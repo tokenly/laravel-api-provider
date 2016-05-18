@@ -181,10 +181,16 @@ class APIControllerHelper {
      * @param  int  $id
      * @return Response
      */
-    public function destroy(APIResourceRepositoryContract $repository, $id)
+    public function destroy(APIResourceRepositoryContract $repository, $id, $required_user_id=null)
     {
         $resource = $repository->findByUuid($id);
         if (!$resource) { return $this->buildJSONResponse(['message' => 'resource not found'], 404); }
+
+        if ($required_user_id !== null AND isset($resource['user_id'])) {
+            if ($resource['user_id'] != $required_user_id) {
+                throw new HttpResponseException(new JsonResponse(['errors' => ['Not authorized to destroy this resource.']], 403));
+            }
+        }
 
         // delete
         $repository->delete($resource);

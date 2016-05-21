@@ -3,70 +3,28 @@
 namespace Tokenly\LaravelApiProvider\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Foundation\Application;
 use Rhumsaa\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
-use Tokenly\LaravelApiProvider\Filter\RequestFilter;
-use \Exception;
+use Tokenly\LaravelApiProvider\Repositories\BaseRepository;
+use Exception;
 
 /*
 * APIRepository
 */
-abstract class APIRepository implements APIResourceRepositoryContract
+abstract class APIRepository extends BaseRepository implements APIResourceRepositoryContract
 {
 
-    // must define this when using the default constructor
-    protected $model_type = '';
-
-    
-    protected $prototype_model;
-
-    function __construct(Application $app) {
-        $this->prototype_model = $app->make($this->model_type);
-    }
-
-
-    public function findByID($id) {
-        return $this->prototype_model->find($id);
-    }
-
-    public function update(Model $model, $attributes) {
-        $attributes = $this->modifyAttributesBeforeUpdate($attributes, $model);
-        return $model->update($attributes);
-    }
-
-    public function delete(Model $model) {
-        return $model->delete();
-    }
-
-
-    ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    // API Model Contract
+    // ------------------------------------------------------------------------
+    // add UUID when creating
 
     public function create($attributes) {
         if (!isset($attributes['uuid'])) { $attributes['uuid'] = Uuid::uuid4()->toString(); }
-
-        $attributes = $this->modifyAttributesBeforeCreate($attributes);
-
-        return $this->prototype_model->create($attributes);
+        return parent::create($attributes);
     }
 
-    public function findAll(RequestFilter $filter=null) {
-        if ($filter === null) {
-            return $this->prototype_model->all();
-        }
 
-        $query = $this->prototype_model->newQuery();
-
-        if ($filter !== null) {
-            $filter->filter($query);
-            $filter->limit($query);
-            $filter->sort($query);
-        }
-
-        return $query->get();
-    }
+    // ------------------------------------------------------------------------
+    // UUID methods
 
     public function findByUuid($uuid) {
         return $this->prototype_model->where('uuid', $uuid)->first();
@@ -85,18 +43,6 @@ abstract class APIRepository implements APIResourceRepositoryContract
 
         $this->delete($model);
         return $model;
-    }
-
-    ////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////
-    // Modify
-    
-    protected function modifyAttributesBeforeCreate($attributes) {
-        return $attributes;
-    }
-
-    protected function modifyAttributesBeforeUpdate($attributes, Model $model) {
-        return $attributes;
     }
 
 }

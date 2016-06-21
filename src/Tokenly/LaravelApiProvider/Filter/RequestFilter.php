@@ -17,6 +17,10 @@ use Illuminate\Http\Request;
         'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
         'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
     ],
+    'limit' => [
+        'field' => 'limit', // optional
+        'max'   => 50,      // optional
+    ],
     'defaults' => ['sort' => 'serial'],
 ]
 */
@@ -127,7 +131,25 @@ abstract class RequestFilter
 
         if ($this->request !== null) {
             $params = $this->request->all();
-            if (isset($params['limit']) AND ($limit = intval($params['limit'])) > 0) {
+
+            $limit_def = isset($this->filter_definitions['limit']) ? $this->filter_definitions['limit'] : [];
+            $limit_field = isset($limit_def['field']) ? $limit_def['field'] : 'limit';
+            $limit = null;
+
+            if (isset($params[$limit_field])) {
+                $limit = intval($params[$limit_field]);
+                if ($limit <= 0) { $limit = null; }
+            }
+
+            if (isset($limit_def['max'])) {
+                if ($limit === null) {
+                    $limit = $limit_def['max'];
+                } else {
+                    $limit = min($limit, $limit_def['max']);
+                }
+            }
+
+            if ($limit !== null) {
                 $query->limit($limit);
             }
         }

@@ -18,8 +18,9 @@ use Illuminate\Http\Request;
         'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
     ],
     'limit' => [
-        'field' => 'limit', // optional
-        'max'   => 50,      // optional
+        'field'       => 'limit', // optional
+        'max'         => 50,      // optional
+        'pagingField' => 'pg',    // optional
     ],
     'defaults' => ['sort' => 'serial'],
 ]
@@ -134,6 +135,7 @@ abstract class RequestFilter
 
             $limit_def = isset($this->filter_definitions['limit']) ? $this->filter_definitions['limit'] : [];
             $limit_field = isset($limit_def['field']) ? $limit_def['field'] : 'limit';
+            $paging_field = isset($limit_def['pagingField']) ? $limit_def['pagingField'] : 'pg';
             $limit = null;
 
             if (isset($params[$limit_field])) {
@@ -151,6 +153,14 @@ abstract class RequestFilter
 
             if ($limit !== null) {
                 $query->limit($limit);
+
+                // check paging
+                if ($paging_field !== null) {
+                    $page = isset($params[$paging_field]) ? intval($params[$paging_field]) : 0;
+                    if ($page > 0) {
+                        $query->skip($page * $limit);
+                    }
+                }
             }
         }
 

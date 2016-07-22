@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
         'token'  => ['field' => 'bot_index.token', 'useIndex' => 'bot_index', 'foreign_id' => 'bot_index.id', 'op' => 'like'],
         'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
         'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
+        'botId'  => ['field' => 'bot_id', 'allow_multiple' => true, 'separator' => ',' ],
     ],
     'limit' => [
         'field'       => 'limit', // optional
@@ -110,13 +111,22 @@ abstract class RequestFilter
 
                     // field
                     if (isset($filter_def['field'])) {
-                        // transform
-                        if (isset($filter_def['transformFn'])) {
-                            $param_value = call_user_func($filter_def['transformFn'], $param_value);
-                        }
+                        $transform_fn = isset($filter_def['transformFn']) ? $filter_def['transformFn'] : null;
 
-                        if (strlen($param_value) AND $param_value !== '*') {
-                            $query->where($filter_def['field'], '=', $param_value);
+                        if ($param_value !== '*') {
+                            if (isset($filter_def['allow_multiple']) AND $filter_def['allow_multiple']) {
+                                $sep = isset($filter_def['separator']) ? $filter_def['separator'] : ',';
+                                $param_value_collection = collect(explode($sep, $param_value))->map(function($item) use ($transform_fn) {
+                                    $item = trim($item);
+                                    // transform each item individually
+                                    if ($transform_fn) { $item = call_user_func($transform_fn, $item); }
+                                    return $item;
+                                });
+                                $query->whereIn($filter_def['field'], $param_value_collection->toArray());
+                            } else if (strlen($param_value)) {
+                                if ($transform_fn) { $param_value = call_user_func($transform_fn, $param_value); }
+                                $query->where($filter_def['field'], '=', $param_value);
+                            }
                         }
                     }
                 }

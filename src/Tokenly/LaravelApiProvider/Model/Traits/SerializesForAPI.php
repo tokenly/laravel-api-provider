@@ -1,6 +1,6 @@
 <?php
 
-namespace Tokenly\LaravelApiProvider\Model;
+namespace Tokenly\LaravelApiProvider\Model\Traits;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;

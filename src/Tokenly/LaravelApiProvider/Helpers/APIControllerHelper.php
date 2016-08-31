@@ -2,7 +2,6 @@
 
 namespace Tokenly\LaravelApiProvider\Helpers;
 
-use Illuminate\Contracts\Auth\Guard;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

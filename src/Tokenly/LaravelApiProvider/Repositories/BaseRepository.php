@@ -4,7 +4,6 @@ namespace Tokenly\LaravelApiProvider\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
-use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
 use Tokenly\LaravelApiProvider\Filter\RequestFilter;
 use Exception;
 

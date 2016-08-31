@@ -2,8 +2,7 @@
 
 namespace Tokenly\LaravelApiProvider\Repositories;
 
-use Illuminate\Database\Eloquent\Model;
-use Rhumsaa\Uuid\Uuid;
+use Ramsey\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
 use Tokenly\LaravelApiProvider\Repositories\BaseRepository;
 use Exception;

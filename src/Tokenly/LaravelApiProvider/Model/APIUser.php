@@ -7,7 +7,7 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Tokenly\LaravelApiProvider\Model\APIModel;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
-use Tokenly\LaravelApiProvider\Model\SerializesForAPI;
+use Tokenly\LaravelApiProvider\Model\Traits\SerializesForAPI;
 
 class APIUser extends APIModel implements AuthenticatableContract, APIUserContract {
 

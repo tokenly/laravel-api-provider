@@ -3,7 +3,7 @@
 namespace Tokenly\LaravelApiProvider\Model;
 
 use Illuminate\Database\Eloquent\Model;
-use Tokenly\LaravelApiProvider\Model\SerializesForAPI;
+use Tokenly\LaravelApiProvider\Model\Traits\SerializesForAPI;
 
 /*
 * APIModel

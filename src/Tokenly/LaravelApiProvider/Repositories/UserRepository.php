@@ -2,9 +2,7 @@
 
 namespace Tokenly\LaravelApiProvider\Repositories;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
-use Rhumsaa\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 use Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract;
 use Tokenly\LaravelApiProvider\Repositories\APIRepository;

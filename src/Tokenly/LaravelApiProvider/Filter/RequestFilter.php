@@ -29,9 +29,10 @@ use Illuminate\Http\Request;
 abstract class RequestFilter
 {
 
-    protected $request = null;
-    protected $filter_definitions = [];
-    protected $apply_context = null;
+    protected $request             = null;
+    protected $override_parameters = null;
+    protected $filter_definitions  = [];
+    protected $apply_context       = null;
 
     static $INDEX_UNIQUE_ID = 0;
 
@@ -44,6 +45,11 @@ abstract class RequestFilter
 
     public function setRequest(Request $request) {
         $this->request = $request;
+        return $this;
+    }
+
+    public function setOverrideParameters($override_parameters) {
+        $this->override_parameters = $override_parameters;
         return $this;
     }
 
@@ -66,8 +72,8 @@ abstract class RequestFilter
     public function select($query) {
         $this->validateQuery($query);
 
-        if ($this->request !== null) {
-            $params = $this->request->all();
+        $params = $this->getParameters();
+        if ($params) {
             if (isset($params['select']) AND strlen($params['select'])) {
                 $field_names = explode(' ', $params['select']);
                 array_walk($field_names, function(&$val) { $val = trim($val); });
@@ -88,8 +94,8 @@ abstract class RequestFilter
     public function filter($query) {
         $this->validateQuery($query);
 
-        if ($this->request !== null) {
-            $params = $this->request->all();
+        $params = $this->getParameters();
+        if ($params) {
             $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
 
             // fill in default filters
@@ -140,8 +146,8 @@ abstract class RequestFilter
     public function limit($query) {
         $this->validateQuery($query);
 
-        if ($this->request !== null) {
-            $params = $this->request->all();
+        $params = $this->getParameters();
+        if ($params) {
 
             $limit_def = isset($this->filter_definitions['limit']) ? $this->filter_definitions['limit'] : [];
             $limit_field = isset($limit_def['field']) ? $limit_def['field'] : 'limit';
@@ -181,7 +187,7 @@ abstract class RequestFilter
     public function sort($query) {
         $this->validateQuery($query);
 
-        $params = $this->request->all();
+        $params = $this->getParameters();
 
         $any_sorts_found = false;
 
@@ -228,6 +234,20 @@ abstract class RequestFilter
 
 
         return $this;
+    }
+
+    protected function getParameters() {
+        $params = [];
+
+        if ($this->request !== null) {
+            $params = $this->request->all();
+        }
+
+        if ($this->override_parameters !== null) {
+            $params = array_merge($params, $this->override_parameters);
+        }
+
+        return $params;
     }
 
     protected function parseSortString($sort_string) {

@@ -22,12 +22,17 @@ class APIControllerHelper {
      *
      * @return Response
      */
-    public function transformResourcesForOutput($resources, $context=null)
+    public function transformResourcesForOutput($resources, $context=null, $wrapper_function=null)
     {
         $out = [];
         foreach ($resources as $resource) {
             $out[] = $resource->serializeForAPI($context);
         }
+
+        if ($wrapper_function !== null) {
+            $out = $wrapper_function($out);
+        }
+
         return $this->buildJSONResponse($out);
     }
 
@@ -99,11 +104,15 @@ class APIControllerHelper {
     }
 
 
-    public function newJsonResponseWithErrors($errors, $code=500) {
+    public function newJsonResponseWithErrors($errors, $code=500, $message=null) {
         if (is_array($errors)) {
-            $message = implode(" ", $errors);
+            if ($message === null) {
+                $message = implode(" ", $errors);
+            }
         } else {
-            $message = $errors;
+            if ($message === null) {
+                $message = $errors;
+            }
             $errors = [$errors];
         }
         return $this->buildJSONResponse(['message' => $message, 'errors' => $errors], $code);

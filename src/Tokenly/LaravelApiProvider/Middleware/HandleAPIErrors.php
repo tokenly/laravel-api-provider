@@ -6,6 +6,7 @@ use Closure;
 use Exception;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Tokenly\LaravelEventLog\EventLog;
 
 class HandleAPIErrors {
@@ -42,8 +43,19 @@ class HandleAPIErrors {
         } catch (HttpResponseException $e) {
             // HttpResponseException can pass through
             throw $e;
+        } catch (ValidationException $e) {
+            $validator = $e->validator;
+            $flat_errors = [];
+            foreach ($validator->errors()->getMessages() as $errors) {
+                $flat_errors = array_merge($flat_errors, array_values($errors));
+            }
+            $response = new JsonResponse([
+                'message' => "The request was not processed successfully. ".implode(" ", $flat_errors),
+                'errors' => $flat_errors,
+            ], 422);
+            return $response;
         } catch (Exception $e) {
-            \Illuminate\Support\Facades\Log::debug("HandleAPIErrors caught exception ".$e->getMessage());
+            \Illuminate\Support\Facades\Log::debug("HandleAPIErrors caught ".get_class($e)." ".$e->getMessage());
             try {
                 $error_trace = $this->getExceptionTraceAsString($e);
             } catch (Exception $other_e) {

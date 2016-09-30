@@ -98,15 +98,6 @@ abstract class RequestFilter
         if ($params) {
             $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
 
-            // fill in default filters
-            foreach($field_filter_definitions as $filter_def) {
-                if (isset($filter_def['default'])) {
-                    if (!isset($params[$filter_def['field']])) {
-                        $params[$filter_def['field']] = $filter_def['default'];
-                    }
-                }
-            }            
-
             foreach($params as $param_key => $param_value) {
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
                     // index
@@ -147,35 +138,33 @@ abstract class RequestFilter
         $this->validateQuery($query);
 
         $params = $this->getParameters();
-        if ($params) {
 
-            $limit_def = isset($this->filter_definitions['limit']) ? $this->filter_definitions['limit'] : [];
-            $limit_field = isset($limit_def['field']) ? $limit_def['field'] : 'limit';
-            $paging_field = isset($limit_def['pagingField']) ? $limit_def['pagingField'] : 'pg';
-            $limit = null;
+        $limit_def = isset($this->filter_definitions['limit']) ? $this->filter_definitions['limit'] : [];
+        $limit_field = isset($limit_def['field']) ? $limit_def['field'] : 'limit';
+        $paging_field = isset($limit_def['pagingField']) ? $limit_def['pagingField'] : 'pg';
+        $limit = null;
 
-            if (isset($params[$limit_field])) {
-                $limit = intval($params[$limit_field]);
-                if ($limit <= 0) { $limit = null; }
+        if (isset($params[$limit_field])) {
+            $limit = intval($params[$limit_field]);
+            if ($limit <= 0) { $limit = null; }
+        }
+
+        if (isset($limit_def['max'])) {
+            if ($limit === null) {
+                $limit = $limit_def['max'];
+            } else {
+                $limit = min($limit, $limit_def['max']);
             }
+        }
 
-            if (isset($limit_def['max'])) {
-                if ($limit === null) {
-                    $limit = $limit_def['max'];
-                } else {
-                    $limit = min($limit, $limit_def['max']);
-                }
-            }
+        if ($limit !== null) {
+            $query->limit($limit);
 
-            if ($limit !== null) {
-                $query->limit($limit);
-
-                // check paging
-                if ($paging_field !== null) {
-                    $page = isset($params[$paging_field]) ? intval($params[$paging_field]) : 0;
-                    if ($page > 0) {
-                        $query->skip($page * $limit);
-                    }
+            // check paging
+            if ($paging_field !== null) {
+                $page = isset($params[$paging_field]) ? intval($params[$paging_field]) : 0;
+                if ($page > 0) {
+                    $query->skip($page * $limit);
                 }
             }
         }
@@ -239,8 +228,20 @@ abstract class RequestFilter
     protected function getParameters() {
         $params = [];
 
+        // start with all fields defaults
+        $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
+
+        // fill in default filters
+        foreach($field_filter_definitions as $filter_def) {
+            if (isset($filter_def['default'])) {
+                $params[$filter_def['field']] = $filter_def['default'];
+            }
+        }
+
+
+
         if ($this->request !== null) {
-            $params = $this->request->all();
+            $params = array_merge($params, $this->request->all());
         }
 
         if ($this->override_parameters !== null) {

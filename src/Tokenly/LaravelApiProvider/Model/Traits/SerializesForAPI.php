@@ -19,6 +19,7 @@ trait SerializesForAPI {
                 if ($array instanceof Model AND !$array->offsetExists($attribute_name)) {
                     continue;
                 } else if (!isset($array[$attribute_name])) {
+                    $out[camel_case($attribute_name)] = null;
                     continue;
                 }
 

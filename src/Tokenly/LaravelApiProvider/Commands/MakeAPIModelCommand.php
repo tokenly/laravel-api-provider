@@ -45,6 +45,7 @@ class MakeAPIModelCommand extends GeneratorCommand {
     {
         return [
             ['with-repository', 'r', InputOption::VALUE_NONE, 'Also generate a repository'],
+            ['with-migration', 'm', InputOption::VALUE_NONE, 'Also generate a migration'],
         ];
     }
 
@@ -59,6 +60,13 @@ class MakeAPIModelCommand extends GeneratorCommand {
             if ($this->option('with-repository')) {
                 $this->comment('making repository');
                 $this->call('api:new-repository', ['name' => $this->argument('name')]);
+            }
+            if ($this->option('with-migration')) {
+                $this->comment('making migration');
+                $name = $this->argument('name');
+                $table = str_plural(snake_case($name));
+                $this->call('make:migration', ['name' => "create_{$table}_table", '--create' => $table]);
+
             }
         }
     }

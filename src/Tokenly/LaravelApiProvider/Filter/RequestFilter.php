@@ -34,6 +34,9 @@ abstract class RequestFilter
     protected $filter_definitions  = [];
     protected $apply_context       = null;
 
+    public $used_limit       = null;
+    public $used_page_offset = null;
+
     static $INDEX_UNIQUE_ID = 0;
 
     public static function createFromRequest(Request $request, $filter_definitions=null) {
@@ -135,6 +138,9 @@ abstract class RequestFilter
 
     // accepts ?limit=10
     public function limit($query) {
+        $this->used_limit       = null;
+        $this->used_page_offset = null;
+
         $this->validateQuery($query);
 
         $params = $this->getParameters();
@@ -158,12 +164,16 @@ abstract class RequestFilter
         }
 
         if ($limit !== null) {
+            $this->used_limit = $limit;
+            $this->used_page_offset = 0;
+
             $query->limit($limit);
 
             // check paging
             if ($paging_field !== null) {
                 $page = isset($params[$paging_field]) ? intval($params[$paging_field]) : 0;
                 if ($page > 0) {
+                    $this->used_page_offset = $page;
                     $query->skip($page * $limit);
                 }
             }

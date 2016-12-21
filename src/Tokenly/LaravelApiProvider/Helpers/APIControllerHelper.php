@@ -45,6 +45,16 @@ class APIControllerHelper {
         return $this->buildJSONResponse($data);
     }
 
+    public function buidPagedItemList($items, $page_offset, $per_page, $total_item_count) {
+        return [
+            'page'      => $page_offset,
+            'perPage'   => $per_page,
+            'pageCount' => ceil($total_item_count / $per_page),
+            'count'     => $total_item_count,
+            'items'     => $items,
+        ];
+    }
+
     public function getAttributesFromRequest(Request $request) {
         $attributes = [];
         $allowed_vars = array_keys($request->rules());

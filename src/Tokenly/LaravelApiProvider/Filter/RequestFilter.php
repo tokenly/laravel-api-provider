@@ -13,7 +13,6 @@ use Illuminate\Http\Request;
         'name'   => ['field' => 'name',],
         'token'  => ['useFilterFn' => function($query, $param_value, $params) {}],
         'token'  => ['useSortFn' => function($query, $parsed_sort_query, $params) {}],
-        'token'  => ['field' => 'bot_index.token', 'useIndex' => 'bot_index', 'foreign_id' => 'bot_index.id', 'op' => 'like'],
         'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
         'serial' => ['sortField' => 'serial', 'defaultSortDirection' => 'asc'],
         'botId'  => ['field' => 'bot_id', 'allow_multiple' => true, 'separator' => ',' ],
@@ -28,6 +27,10 @@ use Illuminate\Http\Request;
         'field' => 'operator',   // specify an optional field to override the default operator
     ],
 ]
+
+
+'useFilterFn' can return an array of parameters that are fed to $query->where or $query->orWhere
+
 */
 abstract class RequestFilter
 {
@@ -111,10 +114,15 @@ abstract class RequestFilter
 
             foreach($params as $param_key => $param_value) {
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
-                    // index
+                    // apply filter function
                     if (isset($filter_def['useFilterFn']) AND is_callable($filter_def['useFilterFn'])) {
                         if ($this->apply_context === null) { $this->apply_context = new \ArrayObject(); }
-                        call_user_func($filter_def['useFilterFn'], $query, $param_value, $params, $this->apply_context);
+                        $filter_result = call_user_func($filter_def['useFilterFn'], $query, $param_value, $params, $this->apply_context);
+
+                        if (is_array($filter_result)) {
+                            $where_method = ($operator_type == self::OP_OR ? 'orWhere' : 'where');
+                            call_user_func_array([$query, $where_method], $filter_result);
+                        }
                     }
 
                     // field

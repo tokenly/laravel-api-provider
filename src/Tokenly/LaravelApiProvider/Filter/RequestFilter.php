@@ -23,7 +23,10 @@ use Illuminate\Http\Request;
         'max'         => 50,      // optional
         'pagingField' => 'pg',    // optional
     ],
-    'defaults' => ['sort' => 'serial'],
+    'defaults' => ['sort' => 'serial', 'operator' => 'AND',],    // default operator is AND
+    'operator' => [
+        'field' => 'operator',   // specify an optional field to override the default operator
+    ],
 ]
 */
 abstract class RequestFilter
@@ -38,6 +41,9 @@ abstract class RequestFilter
     public $used_page_offset = null;
 
     static $INDEX_UNIQUE_ID = 0;
+
+    const OP_AND = 1;
+    const OP_OR  = 2;
 
     public static function createFromRequest(Request $request, $filter_definitions=null) {
         $instance = app(get_called_class());
@@ -101,6 +107,8 @@ abstract class RequestFilter
         if ($params) {
             $field_filter_definitions = isset($this->filter_definitions['fields']) ? $this->filter_definitions['fields'] : [];
 
+            $operator_type = $this->getOperatorType($params);
+
             foreach($params as $param_key => $param_value) {
                 if (isset($field_filter_definitions[$param_key]) AND $filter_def = $field_filter_definitions[$param_key]) {
                     // index
@@ -122,10 +130,20 @@ abstract class RequestFilter
                                     if ($transform_fn) { $item = call_user_func($transform_fn, $item); }
                                     return $item;
                                 });
-                                $query->whereIn($filter_def['field'], $param_value_collection->toArray());
+
+                                if ($operator_type == self::OP_OR) {
+                                    $query->orWhereIn($filter_def['field'], $param_value_collection->toArray());
+                                } else {
+                                    $query->whereIn($filter_def['field'], $param_value_collection->toArray());
+                                }
+
                             } else if (strlen($param_value)) {
                                 if ($transform_fn) { $param_value = call_user_func($transform_fn, $param_value); }
-                                $query->where($filter_def['field'], '=', $param_value);
+                                if ($operator_type == self::OP_OR) {
+                                    $query->orWhere($filter_def['field'], '=', $param_value);
+                                } else {
+                                    $query->where($filter_def['field'], '=', $param_value);
+                                }
                             }
                         }
                     }
@@ -286,6 +304,40 @@ abstract class RequestFilter
         if ($query instanceof \Illuminate\Database\Eloquent\Builder) { return; }
         if ($query instanceof \Illuminate\Database\Query\Builder) { return; }
         throw new Exception("Unsupported query type of ".get_class($query), 1);
+    }
+
+    protected function getOperatorType($params) {
+        $operator_definition = isset($this->filter_definitions['operator']) ? $this->filter_definitions['operator'] : [];
+
+        // check field
+        $op_type = null;
+        if (isset($operator_definition['field'])) {
+            $field = $operator_definition['field'];
+            if (isset($params[$field])) {
+                $op_type = $this->parseOperatorType($params[$field]);
+            }
+        }
+        if ($op_type !== null) { return $op_type; }
+
+        // check default
+        if (isset($this->filter_definitions['defaults']) AND isset($this->filter_definitions['defaults']['operator'])) {
+            $op_type = $this->parseOperatorType($this->filter_definitions['defaults']['operator']);
+        }
+        if ($op_type !== null) { return $op_type; }
+
+        // fall back to OP_AND
+        return self::OP_AND;
+    }
+
+    protected function parseOperatorType($op_type_string) {
+        switch (strtoupper(trim($op_type_string))) {
+            case 'AND':
+                return self::OP_AND;
+            case 'OR':
+                return self::OP_OR;
+        }
+
+        return null;
     }
 }
 

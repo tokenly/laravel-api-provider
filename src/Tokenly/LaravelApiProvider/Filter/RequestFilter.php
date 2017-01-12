@@ -30,6 +30,7 @@ use Illuminate\Http\Request;
 
 
 'useFilterFn' can return an array of parameters that are fed to $query->where or $query->orWhere
+'useFilterFn' can also return a function which is fed to $query->where or $query->orWhere
 
 */
 abstract class RequestFilter
@@ -119,9 +120,11 @@ abstract class RequestFilter
                         if ($this->apply_context === null) { $this->apply_context = new \ArrayObject(); }
                         $filter_result = call_user_func($filter_def['useFilterFn'], $query, $param_value, $params, $this->apply_context);
 
-                        if (is_array($filter_result)) {
+                        $is_array    = is_array($filter_result);
+                        $is_callable = is_callable($filter_result);
+                        if ($is_array OR $is_callable) {
                             $where_method = ($operator_type == self::OP_OR ? 'orWhere' : 'where');
-                            call_user_func_array([$query, $where_method], $filter_result);
+                            call_user_func_array([$query, $where_method], $is_callable ? [$filter_result] : $filter_result);
                         }
                     }
 

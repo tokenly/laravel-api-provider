@@ -43,6 +43,7 @@ abstract class RequestFilter
 
     public $used_limit       = null;
     public $used_page_offset = null;
+    public $query            = null;
 
     static $INDEX_UNIQUE_ID = 0;
 
@@ -84,6 +85,7 @@ abstract class RequestFilter
     // accepts ?select=name description data
     public function select($query) {
         $this->validateQuery($query);
+        $this->query = $query;
 
         $params = $this->getParameters();
         if ($params) {
@@ -106,6 +108,7 @@ abstract class RequestFilter
     // accepts ?name=joe
     public function filter($query) {
         $this->validateQuery($query);
+        $this->query = $query;
 
         $params = $this->getParameters();
         if ($params) {
@@ -171,6 +174,7 @@ abstract class RequestFilter
         $this->used_page_offset = null;
 
         $this->validateQuery($query);
+        $this->query = $query;
 
         $params = $this->getParameters();
 
@@ -214,6 +218,7 @@ abstract class RequestFilter
     // accepts ?sort=name desc
     public function sort($query) {
         $this->validateQuery($query);
+        $this->query = $query;
 
         $params = $this->getParameters();
 

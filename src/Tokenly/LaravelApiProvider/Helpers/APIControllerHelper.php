@@ -80,10 +80,10 @@ class APIControllerHelper {
         $resource = $repository->findByUuid($uuid);
 
         // handle resource not found
-        if (!$resource) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource not found.']], 404)); }
+        if (!$resource) { throw $this->buildJSONResponseException('Resource not found.', 404); }
 
         // validate that the resource belongs to the user
-        if (!$user OR $resource['user_id'] != $user->getID()) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource unauthorized.']], 403)); }
+        if (!$user OR $resource['user_id'] != $user->getID()) { throw $this->buildJSONResponseException('Resource unauthorized.', 403); }
 
         return $resource;
         // $this->transformResourceForOutput($resource);
@@ -94,7 +94,7 @@ class APIControllerHelper {
         $resource = $repository->findByUuid($uuid);
 
         // handle resource not found
-        if (!$resource) { throw new HttpResponseException(new JsonResponse(['errors' => ['Resource not found.']], 404)); }
+        if (!$resource) { throw $this->buildJSONResponseException('Resource not found.', 404); }
 
         return $resource;
     }
@@ -109,10 +109,13 @@ class APIControllerHelper {
 
     public function requirePermission(APIPermissionedUserContract $user, $permission, $description=null) {
         if (!$user->hasPermission($permission)) {
-            throw new HttpResponseException($this->newJsonResponseWithErrors("This user is not authorized to ".($description ? $description : ' perform this action'), 403));
+            throw $this->buildResponseException("This user is not authorized to ".($description ? $description : ' perform this action'), 403);
         }
     }
 
+    public function buildJSONResponseException($error, $error_code=403) {
+        return new HttpResponseException($this->newJsonResponseWithErrors($error, $error_code));
+    }
 
     public function newJsonResponseWithErrors($errors, $code=500, $message=null) {
         if (is_array($errors)) {
@@ -206,7 +209,7 @@ class APIControllerHelper {
 
         if ($required_user_id !== null AND isset($resource['user_id'])) {
             if ($resource['user_id'] != $required_user_id) {
-                throw new HttpResponseException(new JsonResponse(['errors' => ['Not authorized to destroy this resource.']], 403));
+                throw $this->buildJSONResponseException('Not authorized to destroy this resource.', 403);;
             }
         }
 

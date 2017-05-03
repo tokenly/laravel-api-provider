@@ -2,6 +2,7 @@
 
 namespace Tokenly\LaravelApiProvider\Helpers;
 
+use Exception;
 use Illuminate\Http\Exception\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,6 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Tokenly\LaravelApiProvider\Contracts\APIPermissionedUserContract;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
+use Tokenly\LaravelApiProvider\Filter\RequestFilter;
+use Tokenly\LaravelApiProvider\Helpers\ResponseException;
 
 class APIControllerHelper {
 
@@ -53,6 +56,19 @@ class APIControllerHelper {
             'count'     => $total_item_count,
             'items'     => $items,
         ];
+    }
+
+    public function buidPagedResourcesForOutput($resources, RequestFilter $filter, $context=null, $wrapper_function=null) {
+        $serialized_resources = [];
+        foreach ($resources as $resource) {
+            $serialized_resources[] = $resource->serializeForAPI($context);
+        }
+
+        if ($wrapper_function !== null) {
+            $serialized_resources = $wrapper_function($out);
+        }
+
+        return $this->buildJSONResponse($this->buidPagedItemList($serialized_resources, $filter->used_page_offset, $filter->used_limit, $filter->getCountForPagination()));
     }
 
     public function getAttributesFromRequest(Request $request) {
@@ -223,5 +239,24 @@ class APIControllerHelper {
     public function buildJSONResponse($data, $http_code=200) {
         return new JsonResponse($data, $http_code);
     }
+
+    // ------------------------------------------------------------------------
+    // Ajax functions
+
+    public function withAjax($callback) {
+        try {
+            $data = $callback();
+            return $this->buildJSONResponse($data, 200);
+        } catch (ResponseException $e) {
+            return $this->newJsonResponseWithErrors($e->getErrors(), $e->getCode());
+        } catch (HttpResponseException $e) {
+            // HttpResponseException passes through
+            throw $e;
+        } catch (Exception $e) {
+            Log::error("An error occurred: ".$e->getMessage(), ['exception' => $e,]);
+            return $this->newJsonResponseWithErrors("An error occurred with this request", 500);
+        }
+    }
+
 
 }

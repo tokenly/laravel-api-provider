@@ -269,6 +269,17 @@ abstract class RequestFilter
         return $this;
     }
 
+    public function getCountForPagination() {
+        $query = $this->query;
+        if ($query instanceof \Illuminate\Database\Eloquent\Builder) {
+            $query = $this->query->toBase();
+        }
+        if ($query instanceof \Illuminate\Database\Query\Builder) {
+            return $query->getCountForPagination();
+        }
+        throw new Exception("Unsupported query type of ".get_class($query), 1);
+    }
+
     protected function getParameters() {
         $params = [];
 

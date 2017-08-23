@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 [
     'fields' => [
         'name'   => ['field' => 'name',],
+        'label'  => ['field' => 'label', 'allowLike' => true, 'assumeLike' => true], // allows searches with % (or assumes % on either end)
         'token'  => ['useFilterFn' => function($query, $param_value, $params) {}],
         'token'  => ['useSortFn' => function($query, $parsed_sort_query, $params) {}],
         'active' => ['field' => 'active', 'default' => 1, 'transformFn' => ['Tokenly\LaravelApiProvider\Filter\Transformers','toBooleanInteger'] ],
@@ -153,11 +154,24 @@ abstract class RequestFilter
 
                             } else if (strlen($param_value)) {
                                 if ($transform_fn) { $param_value = call_user_func($transform_fn, $param_value); }
-                                if ($operator_type == self::OP_OR) {
-                                    $query->orWhere($filter_def['field'], '=', $param_value);
-                                } else {
-                                    $query->where($filter_def['field'], '=', $param_value);
+
+                                $match_operator = '=';
+                                if (($filter_def['allowLike'] ?? false) AND strpos($param_value, '%')) {
+                                    $match_operator = 'LIKE';
+                                } else if ($filter_def['assumeLike'] ?? false) {
+                                    $match_operator = 'LIKE';
+                                    $param_value = '%'.$param_value.'%';
                                 }
+
+                                if ($operator_type == self::OP_OR) {
+                                    $func = 'orWhere';
+                                } else {
+                                    $func = 'where';
+                                }
+
+                                // $query->where($filter_def['field'], '=', $param_value);
+                                // $query->orWhere($filter_def['field'], '=', $param_value);
+                                call_user_func([$query, $func], $filter_def['field'], $match_operator, $param_value);
                             }
                         }
                     }

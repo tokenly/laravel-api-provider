@@ -9,4 +9,13 @@ trait Permissioned {
         return (isset($privileges[$privilege]) AND $privileges[$privilege]);
     }
 
+    public function getCasts() {
+        $casts = parent::getCasts();
+        if (!isset($casts['privileges'])) {
+            $casts['privileges'] = 'json';
+        }
+
+        return $casts;
+    }
+
 }

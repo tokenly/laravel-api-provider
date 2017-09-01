@@ -12,6 +12,8 @@ interface APIUserRepositoryContract
     public function findByAPIToken($api_token);
     public function findAll();
 
+    public function findByEmail($email);
+
 /*
     public function create($attributes);
 

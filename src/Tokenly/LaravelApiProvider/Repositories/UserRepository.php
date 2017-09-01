@@ -24,6 +24,10 @@ class UserRepository extends APIRepository implements APIUserRepositoryContract
         return $this->prototype_model->where('apitoken', $api_token)->first();
     }
 
+    public function findByEmail($email) {
+        return $this->prototype_model->where('email', $email)->first();
+    }
+
 
     protected function modifyAttributesBeforeCreate($attributes) {
         $token_generator = new TokenGenerator();

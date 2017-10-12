@@ -3,7 +3,7 @@
 namespace Tokenly\LaravelApiProvider\Helpers;
 
 use Exception;
-use Illuminate\Http\Exception\HttpResponseException;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;

@@ -54,9 +54,9 @@ class MakeAPIModelCommand extends GeneratorCommand {
      *
      * @return void
      */
-    public function fire()
+    public function handle()
     {
-        if (parent::fire() !== false) {
+        if (parent::handle() !== false) {
             if ($this->option('with-repository')) {
                 $this->comment('making repository');
                 $this->call('api:new-repository', ['name' => $this->argument('name')]);

@@ -1,11 +1,12 @@
 <?php
 
-use \PHPUnit_Framework_Assert as PHPUnit;
+use PHPUnit\Framework\Assert as PHPUnit;
+use PHPUnit\Framework\TestCase;
 
 /*
 * 
 */
-class SampleTest extends \PHPUnit_Framework_TestCase
+class SampleTest extends TestCase
 {
 
 

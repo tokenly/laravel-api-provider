@@ -6,21 +6,28 @@
     "authors": [
         {
             "name": "Devon Weller",
-            "email": "devon@tokenly.co",
-            "homepage": "http://tokenly.co"
+            "email": "devon@tokenly.com",
+            "homepage": "http://tokenly.com"
         }
     ],
     "require": {
-        "php": ">=5.5.0",
+        "php": ">=7.0.0",
         "ramsey/uuid": "^3",
-        "tokenly/token-generator": "dev-master",
+        "tokenly/token-generator": "^1",
         "tokenly/laravel-event-log": "^2",
         "tokenly/hmac-auth": "^1.1.2"
     },
     "require-dev": {
-        "phpunit/phpunit": "~4"
+        "phpunit/phpunit": "~6"
     },
     "autoload": {
-        "psr-0": {"Tokenly\\LaravelApiProvider": "src"}
+        "psr-4": {"Tokenly\\LaravelApiProvider\\": "src"}
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tokenly\\LaravelApiProvider\\APIServiceProvider"
+            ]
+        }
     }
 }

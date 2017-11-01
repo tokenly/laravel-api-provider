@@ -14,7 +14,7 @@
         "php": ">=7.0.0",
         "ramsey/uuid": "^3",
         "tokenly/token-generator": "^1",
-        "tokenly/laravel-event-log": "^2",
+        "tokenly/laravel-event-log": "^3",
         "tokenly/hmac-auth": "^1.1.2"
     },
     "require-dev": {

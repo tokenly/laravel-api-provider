@@ -14,13 +14,4 @@ interface APIUserRepositoryContract
 
     public function findByEmail($email);
 
-/*
-    public function create($attributes);
-
-
-    public function deleteByUuid($uuid);
-
-    public function updateByUuid($uuid, $attributes);
-*/
-
 }

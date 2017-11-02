@@ -2,10 +2,12 @@
 
 namespace Tokenly\LaravelApiProvider\Repositories;
 
+use Exception;
 use Ramsey\Uuid\Uuid;
 use Tokenly\LaravelApiProvider\Contracts\APIResourceRepositoryContract;
+use Tokenly\LaravelApiProvider\Model\Traits\UsesBinaryUuids;
+use Tokenly\LaravelApiProvider\Model\Uuid\UuidHelper;
 use Tokenly\LaravelApiProvider\Repositories\BaseRepository;
-use Exception;
 
 /*
 * APIRepository
@@ -26,6 +28,9 @@ abstract class APIRepository extends BaseRepository implements APIResourceReposi
     // UUID methods
 
     public function findByUuid($uuid) {
+        if (class_uses($this->prototype_model, UsesBinaryUuids::class)) {
+            $uuid = UuidHelper::toBinary($uuid);
+        }
         return $this->prototype_model->where('uuid', $uuid)->first();
     }
 

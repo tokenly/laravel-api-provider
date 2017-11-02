@@ -8,10 +8,17 @@ use Tokenly\LaravelApiProvider\Contracts\APISerializeable;
 
 trait SerializesForAPI {
 
-    private function __serializeForAPI($attribute_names, $array) {
+    private function __serializeForAPI($attribute_specs, $array) {
         $out = [];
-        foreach($attribute_names as $attribute_name) {
-            if ($attribute_name == 'id' AND isset($array['uuid'])) {
+        foreach($attribute_specs as $attribute_spec) {
+            if (!is_array($attribute_spec)) {
+                $attribute_spec = ['name' => $attribute_spec];
+            }
+            $attribute_name = $attribute_spec['name'];
+
+            if (isset($attribute_spec['getter'])) {
+                $out[camel_case($attribute_name)] = call_user_func([$array, $attribute_spec['getter']]);
+            } else if ($attribute_name == 'id' AND isset($array['uuid'])) {
                 // id always uses the uuid
                 $out['id'] = $array['uuid'];
             } else {

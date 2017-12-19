@@ -42,7 +42,7 @@ EOF
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
 
         $user_repository = $this->laravel->make('Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract');

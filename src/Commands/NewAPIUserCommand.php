@@ -33,6 +33,8 @@ class NewAPIUserCommand extends Command {
 
         $this
             ->addArgument('email', InputArgument::REQUIRED, 'Email Address')
+            ->addArgument('name', InputArgument::OPTIONAL, 'Name', '')
+            ->addArgument('username', InputArgument::OPTIONAL, 'Username')
             ->addOption('password', 'p', InputOption::VALUE_OPTIONAL, 'Password', null)
             ->setHelp(<<<EOF
 Create a new user with API Credentials
@@ -45,10 +47,12 @@ EOF
      *
      * @return mixed
      */
-    public function fire()
+    public function handle()
     {
         $user_repository = $this->laravel->make('Tokenly\LaravelApiProvider\Contracts\APIUserRepositoryContract');
         $user_vars = [
+            'name'     => $this->input->getArgument('name'),
+            'username' => $this->input->getArgument('username'),
             'email'    => $this->input->getArgument('email'),
             'password' => $this->input->getOption('password'),
 

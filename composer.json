@@ -2,7 +2,7 @@
     "name": "tokenly/laravel-api-provider",
     "description": "An API service provider for Laravel",
     "type": "library",
-    "license": "AGPLv3",
+    "license": "AGPL-3.0-only",
     "authors": [
         {
             "name": "Devon Weller",

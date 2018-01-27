@@ -2,10 +2,14 @@
 
 namespace Tokenly\LaravelApiProvider\Repositories;
 
+use Tokenly\LaravelApiProvider\Events\ModelCreated;
+use Tokenly\LaravelApiProvider\Events\ModelDeleted;
+use Tokenly\LaravelApiProvider\Events\ModelUpdated;
+use Tokenly\LaravelApiProvider\Repositories\Concerns\BroadcastsRepositoryEvents;
+use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Application;
 use Tokenly\LaravelApiProvider\Filter\RequestFilter;
-use Exception;
 
 /*
 * BaseRepository
@@ -28,11 +32,25 @@ abstract class BaseRepository
 
     public function update(Model $model, $attributes) {
         $attributes = $this->modifyAttributesBeforeUpdate($attributes, $model);
-        return $model->update($attributes);
+        $result = $model->update($attributes);
+
+        // broadcast update event
+        if ($this->usesTrait(BroadcastsRepositoryEvents::class)) {
+            $this->broadcastRepositoryEvent(new ModelUpdated($model, $attributes));
+        }
+
+        return $result;
     }
 
     public function delete(Model $model) {
-        return $model->delete();
+        $result = $model->delete();
+
+        // broadcast delete event
+        if ($this->usesTrait(BroadcastsRepositoryEvents::class)) {
+            $this->broadcastRepositoryEvent(new ModelDeleted($model));
+        }
+
+        return $result;
     }
 
 
@@ -42,7 +60,14 @@ abstract class BaseRepository
     public function create($attributes) {
         $attributes = $this->modifyAttributesBeforeCreate($attributes);
 
-        return $this->prototype_model->create($attributes);
+        $model = $this->prototype_model->create($attributes);
+
+        // broadcast create event
+        if ($this->usesTrait(BroadcastsRepositoryEvents::class)) {
+            $this->broadcastRepositoryEvent(new ModelCreated($model, $attributes));
+        }
+
+        return $model;
     }
 
     public function findAll(RequestFilter $filter=null) {
@@ -72,4 +97,16 @@ abstract class BaseRepository
         return $attributes;
     }
 
+    // ------------------------------------------------------------------------
+    // traits
+
+    protected $_traits_used = [];
+
+    protected function usesTrait($trait_class) {
+        if (!isset($this->_traits_used[$trait_class])) {
+            $this->_traits_used = class_uses($this);
+        }
+
+        return isset($this->_traits_used[$trait_class]);
+    }
 }

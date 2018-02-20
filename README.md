@@ -15,3 +15,17 @@ return [
 
 ];
 ```
+
+- Update `config/auth.php` and modify the user class
+
+```
+    // ...
+    'providers' => [
+        'users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\User::class,
+        ],
+    ],
+    // ...
+
+```

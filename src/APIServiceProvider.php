@@ -44,12 +44,14 @@ class APIServiceProvider extends ServiceProvider
         });
 
         // add artisan commands
-        $this->commands([
-            'Tokenly\LaravelApiProvider\Commands\NewAPIUserCommand',
-            'Tokenly\LaravelApiProvider\Commands\ListAPIUsersCommand',
-            'Tokenly\LaravelApiProvider\Commands\MakeAPIModelCommand',
-            'Tokenly\LaravelApiProvider\Commands\MakeAPIRespositoryCommand',
-        ]);
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                'Tokenly\LaravelApiProvider\Commands\NewAPIUserCommand',
+                'Tokenly\LaravelApiProvider\Commands\ListAPIUsersCommand',
+                'Tokenly\LaravelApiProvider\Commands\MakeAPIModelCommand',
+                'Tokenly\LaravelApiProvider\Commands\MakeAPIRespositoryCommand',
+            ]);
+        }
     }
 
 

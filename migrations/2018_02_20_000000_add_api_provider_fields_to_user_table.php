@@ -12,7 +12,7 @@ class AddApiProviderFieldsToUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn($table->getTable(), 'uuid')) {
                 $table->char('uuid', 36)->unique();
             }

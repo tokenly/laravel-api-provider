@@ -14,6 +14,8 @@ class APIServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // migrations
+        $this->loadMigrationsFrom(__DIR__.'/../migrations');
     }
 
     /**

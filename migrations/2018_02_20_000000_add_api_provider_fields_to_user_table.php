@@ -14,19 +14,19 @@ class AddApiProviderFieldsToUserTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn($table->getTable(), 'uuid')) {
-                $table->char('uuid', 36)->unique();
+                $table->char('uuid', 36)->unique()->default('');
             }
             if (!Schema::hasColumn($table->getTable(), 'username')) {
-                $table->string('username')->unique();
+                $table->string('username')->unique()->default('');
             }
             if (!Schema::hasColumn($table->getTable(), 'privileges')) {
                 $table->text('privileges')->nullable();
             }
             if (!Schema::hasColumn($table->getTable(), 'apitoken')) {
-                $table->string('apitoken', 16)->unique();
+                $table->string('apitoken', 16)->unique()->nullable();
             }
             if (!Schema::hasColumn($table->getTable(), 'apisecretkey')) {
-                $table->string('apisecretkey', 40);
+                $table->string('apisecretkey', 40)->nullable();
             }
         });
     }

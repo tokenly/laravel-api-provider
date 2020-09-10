@@ -2,7 +2,7 @@
 
 namespace Tokenly\LaravelApiProvider\Model;
 
-use Illuminate\Auth\Authenticatable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 use Illuminate\Database\Eloquent\Model;
 use Tokenly\LaravelApiProvider\Model\APIModel;

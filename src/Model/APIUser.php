@@ -9,9 +9,7 @@ use Tokenly\LaravelApiProvider\Model\APIModel;
 use Tokenly\LaravelApiProvider\Contracts\APIUserContract;
 use Tokenly\LaravelApiProvider\Model\Traits\SerializesForAPI;
 
-class APIUser extends APIModel implements AuthenticatableContract, APIUserContract {
-
-    use Authenticatable;
+class APIUser extends Authenticatable implements AuthenticatableContract, APIUserContract {
 
     use SerializesForAPI;
     protected $api_attributes = ['id', 'api_token', ];

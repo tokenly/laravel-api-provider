@@ -12,6 +12,8 @@ class AddApiProviderFieldsToUserTable extends Migration
      */
     public function up()
     {
+      /*
+      //not sure why we need this as a migration in *every* single project.......
         Schema::table('users', function (Blueprint $table) {
             if (!Schema::hasColumn($table->getTable(), 'uuid')) {
                 $table->char('uuid', 36)->unique()->default('');
@@ -29,6 +31,7 @@ class AddApiProviderFieldsToUserTable extends Migration
                 $table->string('apisecretkey', 40)->nullable();
             }
         });
+      */
     }
 
     /**

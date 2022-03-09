@@ -23,8 +23,6 @@ class MakeAPIRespositoryCommand extends GeneratorCommand {
     protected $description = 'Create a new API Repository';
 
 
-    public function getHelp() { return 'Generates a new API repository class'; }
-
     /**
      * Get the console command arguments.
      *

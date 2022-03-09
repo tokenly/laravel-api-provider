@@ -22,9 +22,6 @@ class MakeAPIModelCommand extends GeneratorCommand {
      */
     protected $description = 'Create a new API Model';
 
-
-    public function getHelp(): string { return 'Generates a new API model class'; }
-
     /**
      * Get the console command arguments.
      *
